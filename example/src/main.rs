@@ -64,7 +64,7 @@ async fn main()-> anyhow::Result<()> {
    // let rows=Record::insert(&mut rb,&record).await.expect("insert failed");
    //  println!("插入了{}行数据",rows.rows_affected);
     let dt=FastDateTime::now();
-    println!("{}",dt);
+    println!("dt={}",dt);
     insert_to_meters(&mut rb,"d1001",dt).await;
     let rows=Record::select_all(&mut rb).await?;
        println!("超级表:{}",json!(rows));
