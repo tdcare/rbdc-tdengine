@@ -6,14 +6,26 @@ use rbs::Value;
 use std::sync::Arc;
 use futures_util::TryFutureExt;
 use rbs::value::map::ValueMap;
-use taos::*;
+use taos::sync::*;
 use taos::ColumnView;
+// use taos_query::common::raw::rows::RowView;
+// use taos_query::AsyncFetchable;
 
 use crate::driver::TaosDriver;
 use crate::encode::Encode;
 
 use crate::options::TaosConnectOptions;
 use crate::rows::{TaosColumn, TaosData, TaosRow};
+
+// pub trait fields_count{
+//     fn get_fields_count(&self) -> i32;
+// }
+//
+// impl fields_count for ResultSet {
+//     fn get_fields_count(&self) -> i32 {
+//         self.num_of_fields() as i32
+//     }
+// }
 
 #[derive(Clone)]
 pub struct TaosConnection {
@@ -22,7 +34,6 @@ pub struct TaosConnection {
 
 impl Connection for TaosConnection{
     fn get_rows(&mut self, sql: &str, params: Vec<Value>) -> BoxFuture<Result<Vec<Box<dyn Row>>, Error>> {
-        // todo!()
         // let sql:String = TaosDriver {}.pub_exchange(sql);
         let mut sql=sql.to_string();
         Box::pin(async move {
@@ -55,8 +66,12 @@ impl Connection for TaosConnection{
                     }
                 }
             }
-            let mut q = self.conn.query(sql).map_err(|e| Error::from(e.to_string())).await?;
+            let mut q = self.conn.query(sql).map_err(|e| Error::from(e.to_string()))?;
+            let mut results = vec![];
 
+            if q.fields().len()==0{
+                 return Ok(results)
+             }
             let  fields=q.fields();
 
             let mut columns = vec![];
@@ -65,10 +80,8 @@ impl Connection for TaosConnection{
                     name: field.name().to_string(),
                     column_type: field.ty() });
             }
-            let mut rows = q.rows();
-            let mut results = vec![];
-
-            while let Some(row) = rows.try_next().map_err(|e| Error::from(e.to_string())).await? {
+            for row in q.rows(){
+                let row = row.map_err(|e| Error::from(e.to_string()))?;
                 let mut datas =vec![];
                 for (name, value) in row {
                     datas.push(TaosData {
@@ -89,7 +102,6 @@ impl Connection for TaosConnection{
     }
 
     fn exec(&mut self, sql: &str, params: Vec<Value>) -> BoxFuture<Result<ExecResult, Error>> {
-        // todo!()
         // log::debug!("sql={}",sql);
         let mut sql=sql.to_string();
         Box::pin(async move {
@@ -103,7 +115,6 @@ impl Connection for TaosConnection{
             let rows = stmt.bind(&p).map_err(|e| Error::from(e.to_string()))?
                 .add_batch().map_err(|e| Error::from(e.to_string()))?
                 .execute().map_err(|e| Error::from(e.to_string()))?;
-
             Ok(ExecResult {
                 rows_affected: rows as u64,
                 last_insert_id: Value::Null,
