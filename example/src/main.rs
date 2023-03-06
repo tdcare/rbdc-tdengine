@@ -32,10 +32,10 @@ crud!(Record{},"meters");
 #[py_sql(
 "`INSERT INTO `
    ` #{tbname} USING meters TAGS(2,'California.SanFrancisco')`
-   `  VALUES ('2018-10-03 14:38:05.000', 10.30000, 219, 0.31000)`
+   `  VALUES (#{dt}, 10.30000, 219, 0.31000)`
 "
 )]
-async fn insert_to_meters(rb: &mut dyn Executor,tbname:&str,)->(){
+async fn insert_to_meters(rb: &mut dyn Executor,tbname:&str,dt:FastDateTime)->(){
     impled!()
 }
 
@@ -63,8 +63,9 @@ async fn main()-> anyhow::Result<()> {
 
    // let rows=Record::insert(&mut rb,&record).await.expect("insert failed");
    //  println!("插入了{}行数据",rows.rows_affected);
-
-    insert_to_meters(&mut rb,"d1001").await;
+    let dt=FastDateTime::now();
+    println!("{}",dt);
+    insert_to_meters(&mut rb,"d1001",dt).await;
     let rows=Record::select_all(&mut rb).await?;
        println!("超级表:{}",json!(rows));
 Ok(())

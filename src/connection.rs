@@ -60,6 +60,10 @@ impl Connection for TaosConnection{
                         if name.eq("Timestamp") {
                             sql= sql.replacen("?", &*format!("{}", ext_v), 1);
                         }
+                        if name.eq("DateTime"){
+                            sql= sql.replacen("?", &*format!("{}", ext_v), 1);
+                        }
+
                     }
                     _=>{
                         sql= sql.replacen("?", &*format!("{}", v), 1);
