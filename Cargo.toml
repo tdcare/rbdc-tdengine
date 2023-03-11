@@ -1,6 +1,6 @@
 [package]
 name = "rbdc-tdengine"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "TDengine driver for rbatis"
 readme = "Readme.md"
@@ -21,11 +21,13 @@ futures-util = {version="0.3.21",features = ["alloc", "sink"]}
 chrono = "0.4.19"
 log="0.4"
 bigdecimal = { version = "0.2.0", features = ["serde"] }
+#thiserror = "1.0.39"
+#anyhow = "1.0.69"
 
 fastdate = "0.1.33"
 
 tokio = {version="1",features=["fs", "net", "rt", "rt-multi-thread", "time", "io-util"]}
 tokio-util = {version="0.7.1",features=["compat"]}
 
-taos = { version = "0.4.18", default-features = false, features = ["ws"] }
-taos-query = "0.3.14"
+taos = { version = "0.5.1", default-features = false, features = ["ws"] }
+taos-query = "0.5.1"
