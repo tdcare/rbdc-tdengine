@@ -101,6 +101,45 @@ impl Encode for Value {
         Ok(())
     }
 }
+
+/// 将sql 语名中的 ？ 替换 为Value 中的值
+pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String{
+    for v in params {
+        match v {
+            Value::Null => {}
+            // Value::Bool(_) => {
+            //     sql= sql.replacen("?", &*format!("{}", v), 1);
+            // }
+            // Value::I32(_) => {}
+            // Value::I64(_) => {}
+            // Value::U32(_) => {}
+            // Value::U64(_) => {}
+            // Value::F32(_) => {}
+            // Value::F64(_) => {}
+            Value::String(_) => {
+                sql= sql.replacen("?", &*format!("{}", v), 1);
+                sql= sql.replace("\"", "'");
+            }
+            // Value::Binary(_) => {}
+            // Value::Array(_) => {}
+            // Value::Map(_) => {}
+            Value::Ext(name, ext_v) => {
+                if name.eq("Timestamp") {
+                    sql= sql.replacen("?", &*format!("{}", ext_v), 1);
+                }
+                if name.eq("DateTime"){
+                    sql= sql.replacen("?", &*format!("{}", ext_v), 1);
+                }
+
+            }
+            _=>{
+                sql= sql.replacen("?", &*format!("{}", v), 1);
+            }
+        }
+    }
+    return sql;
+}
+
 #[cfg(test)]
 mod test{
     use std::fmt::Debug;

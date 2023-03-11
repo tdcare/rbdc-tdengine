@@ -12,7 +12,7 @@ use taos::ColumnView;
 // use taos_query::AsyncFetchable;
 
 use crate::driver::TaosDriver;
-use crate::encode::Encode;
+use crate::encode::*;
 
 use crate::options::TaosConnectOptions;
 use crate::rows::{TaosColumn, TaosData, TaosRow};
@@ -37,39 +37,7 @@ impl Connection for TaosConnection{
         // let sql:String = TaosDriver {}.pub_exchange(sql);
         let mut sql=sql.to_string();
         Box::pin(async move {
-            for v in params {
-                match v {
-                    Value::Null => {}
-                    // Value::Bool(_) => {
-                    //     sql= sql.replacen("?", &*format!("{}", v), 1);
-                    // }
-                    // Value::I32(_) => {}
-                    // Value::I64(_) => {}
-                    // Value::U32(_) => {}
-                    // Value::U64(_) => {}
-                    // Value::F32(_) => {}
-                    // Value::F64(_) => {}
-                    Value::String(_) => {
-                        sql= sql.replacen("?", &*format!("{}", v), 1);
-                        sql= sql.replace("\"", "'");
-                    }
-                    // Value::Binary(_) => {}
-                    // Value::Array(_) => {}
-                    // Value::Map(_) => {}
-                    Value::Ext(name, ext_v) => {
-                        if name.eq("Timestamp") {
-                            sql= sql.replacen("?", &*format!("{}", ext_v), 1);
-                        }
-                        if name.eq("DateTime"){
-                            sql= sql.replacen("?", &*format!("{}", ext_v), 1);
-                        }
-
-                    }
-                    _=>{
-                        sql= sql.replacen("?", &*format!("{}", v), 1);
-                    }
-                }
-            }
+            sql=sql_replacen(sql,params);
             let mut q = self.conn.query(sql).map_err(|e| Error::from(e.to_string()))?;
             let mut results = vec![];
 
@@ -109,16 +77,18 @@ impl Connection for TaosConnection{
         // log::debug!("sql={}",sql);
         let mut sql=sql.to_string();
         Box::pin(async move {
-            let mut p = Vec::with_capacity(params.len());
-            for x in params {
-                x.encode(&mut p).map_err(|e| Error::from(e.to_string()))?
-            }
-            let mut stmt = Stmt::init(&self.conn).map_err(|e| Error::from(e.to_string()))?;
-            stmt.prepare(sql).map_err(|e| Error::from(e.to_string()))?;
-
-            let rows = stmt.bind(&p).map_err(|e| Error::from(e.to_string()))?
-                .add_batch().map_err(|e| Error::from(e.to_string()))?
-                .execute().map_err(|e| Error::from(e.to_string()))?;
+            // let mut p = Vec::with_capacity(params.len());
+            // for x in params {
+            //     x.encode(&mut p).map_err(|e| Error::from(e.to_string()))?
+            // }
+            // let mut stmt = Stmt::init(&self.conn).map_err(|e| Error::from(e.to_string()))?;
+            // stmt.prepare(sql).map_err(|e| Error::from(e.to_string()))?;
+            //
+            // let rows = stmt.bind(&p).map_err(|e| Error::from(e.to_string()))?
+            //     .add_batch().map_err(|e| Error::from(e.to_string()))?
+            //     .execute().map_err(|e| Error::from(e.to_string()))?;
+            sql=sql_replacen(sql,params);
+           let rows= self.conn.exec(sql).map_err(|e| Error::from(e.to_string()))?;
             Ok(ExecResult {
                 rows_affected: rows as u64,
                 last_insert_id: Value::Null,
