@@ -6,6 +6,10 @@ use std::str::FromStr;
 use fastdate::DateTime;
 use std::ops::Index;
 use rbdc::Error;
+use rbdc::json::Json;
+use rbdc::timestamp::Timestamp;
+use rbdc::types::*;
+use rbdc::uuid::Uuid;
 use rbs::Value;
 // use taos::ColumnView;
 //
@@ -116,8 +120,32 @@ pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String {
             // Value::U64(_) => {}
             // Value::F32(_) => {}
             // Value::F64(_) => {}
-            Value::String(_) => {
-                sql = sql.replacen("?", &*format!("{}", v), 1);
+            Value::String(ref v_string) => {
+                   if v_string.ends_with(timestamp::Timestamp::ends_name()){
+                       let v=v.to_string().replace(timestamp::Timestamp::ends_name(),"").trim_matches('\"').to_string();
+                       let v=v.parse::<u64>().unwrap_or_default();
+                       sql = sql.replacen("?", &*format!("{}",v), 1);
+
+                   }else if v_string.ends_with(datetime::DateTime::ends_name()) {
+                       let v=v.to_string().replace(datetime::DateTime::ends_name(),"").to_string();
+                       sql = sql.replacen("?", &*format!("{}",v), 1);
+                   }else if v_string.ends_with(time::Time::ends_name()){
+                       let v=v.to_string().replace(time::Time::ends_name(),"").to_string();
+                       sql = sql.replacen("?", &*format!("{}",v), 1);
+                   }else if v_string.ends_with(date::Date::ends_name()){
+                       let v=v.to_string().replace(date::Date::ends_name(),"").to_string();
+                       sql = sql.replacen("?", &*format!("{}",v), 1);
+                   }else if v_string.ends_with(decimal::Decimal::ends_name()){
+                       let v=v.to_string().replace(decimal::Decimal::ends_name(),"").to_string();
+                       sql = sql.replacen("?", &*format!("{}",v), 1);
+                   }else if v_string.ends_with(Uuid::ends_name()) {
+                       let v=v.to_string().replace(Uuid::ends_name(),"").to_string();
+                       sql = sql.replacen("?", &*format!("{}",v), 1);
+                   }else {
+                       sql = sql.replacen("?", &*format!("{}", v), 1);
+                   }
+
+
                 sql = sql.replace("\"", "'");
             }
             // Value::Binary(_) => {}
@@ -132,47 +160,48 @@ pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String {
             //     }
             //
             // }
-            Value::Map(mut m) => {
-                //Ok(IsNull::Yes)
-                println!("{}",m);
-                let t = m.index("type").as_str().unwrap_or_default();
-                if t != "" {
-                    match t {
-                        "Date" => {
-                            let ext_v = m.rm("value");
-                            sql = sql.replacen("?", &*format!("{}", ext_v), 1);
-                        }
-                        "DateTime" => {
-                            let ext_v = m.rm("value");
-                            sql = sql.replacen("?", &*format!("{}", ext_v), 1);
-                        }
-                        "Time" => {
-                            let ext_v = m.rm("value");
-                            sql = sql.replacen("?", &*format!("{}", ext_v), 1);
-                        }
-                        "Timestamp" => {
-                            let ext_v = m.rm("value");
-                            sql = sql.replacen("?", &*format!("{}", ext_v), 1);
-                        }
-                        "Decimal" => {
-                            let ext_v = m.rm("value");
-                            sql = sql.replacen("?", &*format!("{}", ext_v), 1);
-                        }
-                        "Json" => {
-                            let ext_v = m.rm("value");
-                            sql = sql.replacen("?", &*format!("{}", ext_v), 1);
-                        }
-                        "Uuid" => {
-                            let ext_v = m.rm("value");
-                            sql = sql.replacen("?", &*format!("{}", ext_v), 1);
-                        }
-                        _ => {
-                            let ext_v = m.rm("value");
-                            sql = sql.replacen("?", &*format!("{}", ext_v), 1);
-                        }
-                    }
-                }
-            }
+            // Value::Map(mut m) => {
+            //     //Ok(IsNull::Yes)
+            //     println!("{}",m);
+            //     let t = m.index("type").as_str().unwrap_or_default();
+            //     if t != "" {
+            //         match t {
+            //             "Date" => {
+            //                 let ext_v = m.rm("value");
+            //                 sql = sql.replacen("?", &*format!("{}", ext_v), 1);
+            //             }
+            //             "DateTime" => {
+            //                 let ext_v = m.rm("value");
+            //                 sql = sql.replacen("?", &*format!("{}", ext_v), 1);
+            //             }
+            //             "Time" => {
+            //                 let ext_v = m.rm("value");
+            //                 sql = sql.replacen("?", &*format!("{}", ext_v), 1);
+            //             }
+            //             "Timestamp" => {
+            //                 let ext_v = m.rm("value");
+            //                 let ext_v_string=format!("{}", ext_v).replace("TS","");
+            //                 sql = sql.replacen("?", &ext_v_string, 1);
+            //             }
+            //             "Decimal" => {
+            //                 let ext_v = m.rm("value");
+            //                 sql = sql.replacen("?", &*format!("{}", ext_v), 1);
+            //             }
+            //             "Json" => {
+            //                 let ext_v = m.rm("value");
+            //                 sql = sql.replacen("?", &*format!("{}", ext_v), 1);
+            //             }
+            //             "Uuid" => {
+            //                 let ext_v = m.rm("value");
+            //                 sql = sql.replacen("?", &*format!("{}", ext_v), 1);
+            //             }
+            //             _ => {
+            //                 let ext_v = m.rm("value");
+            //                 sql = sql.replacen("?", &*format!("{}", ext_v), 1);
+            //             }
+            //         }
+            //     }
+            // }
             _ => {
                 sql = sql.replacen("?", &*format!("{}", v), 1);
             }
@@ -185,7 +214,11 @@ pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String {
 #[cfg(test)]
 mod test{
     use std::fmt::Debug;
-    use rbdc::TV;
+    use std::str::FromStr;
+    use fastdate::DateTime;
+    use rbdc::date::Date;
+    use rbdc::{datetime, time};
+    use rbdc::timestamp::Timestamp;
     use rbs::Value;
     use taos::ColumnView;
     use crate::encode::sql_replacen;
@@ -194,7 +227,7 @@ mod test{
     #[test]
     fn test_value(){
         let string_v=Value::String("测试".to_string());
-        let timestamp_v=Value::from(vec![("Timestamp".into(),Value::I64(1677859610000))]);
+        let timestamp_v=Value::from(vec![("Timestamp".into(),Value::I64(16778596100))]);
         println!("{},{}",timestamp_v,string_v);
         let mut  cvs:Vec<ColumnView>=vec![];
         // string_v.encode(&mut cvs);
@@ -205,12 +238,18 @@ mod test{
     }
     #[test]
     fn string_replacen(){
-        let mut sql="select * from table where id=? and name=? and u32=? and bool=? time<?".to_string();
-        let vaules=vec![Value::I64(10),
+        let mut sql="select * from table where id=? and name=? and u32=? and bool=? timestamp<? and date>? and datetime<? and time=?".to_string();
+        let vaules=vec![
+                        Value::I64(10),
                         Value::String("测试".to_string()),
                         Value::U32(32),
                         Value::Bool(false),
-                        Value::from(TV::new("Timestamp",Value::I64(1677859610000))),
+                        Value::from(Timestamp::from(1677859610000)),
+                        Value::from(Date::from_str("2023-03-20").unwrap()),
+                        Value::from(datetime::DateTime::from(fastdate::DateTime::now())),
+                        Value::from(rbdc::types::time::Time::from_str("15:04:05.999999999").unwrap()),
+
+
 
         ];
         sql=sql_replacen(sql,vaules);

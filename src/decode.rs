@@ -5,9 +5,11 @@ use bigdecimal::BigDecimal;
 use taos::ColumnView;
 use taos::Ty;
 use std::sync::Arc;
-use rbdc::{datetime::FastDateTime, Error, TV};
+use rbdc::{datetime::FastDateTime, Error};
 use rbs::Value;
 use std::str::FromStr;
+use rbdc::datetime::DateTime;
+use rbdc::timestamp::Timestamp;
 use crate::rows::TaosColumn;
 use crate::rows::TaosData;
 
@@ -77,12 +79,11 @@ impl Decode for Value {
 
             }
             Some(Ty::Timestamp) => {
-                let date=FastDateTime::from_str(&value).unwrap().unix_timestamp_millis();
-                let tv=TV::new("Timestamp",Value::I64(date));
+               // let date=FastDateTime::from_str(&value).unwrap().unix_timestamp_millis();
+                let timestamp=Timestamp::from_str(&value).unwrap();
+                // let tv=TV::new("Timestamp",Value::I64(date));
+               return  Ok(Value::from(timestamp));
 
-               return  Ok(Value::from(tv));
-
-                // return Ok(Value::from(("Timestamp",Value::I64(date))));
 
             }
             Some(Ty::VarChar) => {
