@@ -120,46 +120,29 @@ pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String {
             // Value::U64(_) => {}
             // Value::F32(_) => {}
             // Value::F64(_) => {}
-            Value::String(ref v_string) => {
-                   if v_string.ends_with(timestamp::Timestamp::ends_name()){
-                       let v=v.to_string().replace(timestamp::Timestamp::ends_name(),"").trim_matches('\"').to_string();
-                       let v=v.parse::<u64>().unwrap_or_default();
-                       sql = sql.replacen("?", &*format!("{}",v), 1);
-
-                   }else if v_string.ends_with(datetime::DateTime::ends_name()) {
-                       let v=v.to_string().replace(datetime::DateTime::ends_name(),"").to_string();
-                       sql = sql.replacen("?", &*format!("{}",v), 1);
-                   }else if v_string.ends_with(time::Time::ends_name()){
-                       let v=v.to_string().replace(time::Time::ends_name(),"").to_string();
-                       sql = sql.replacen("?", &*format!("{}",v), 1);
-                   }else if v_string.ends_with(date::Date::ends_name()){
-                       let v=v.to_string().replace(date::Date::ends_name(),"").to_string();
-                       sql = sql.replacen("?", &*format!("{}",v), 1);
-                   }else if v_string.ends_with(decimal::Decimal::ends_name()){
-                       let v=v.to_string().replace(decimal::Decimal::ends_name(),"").to_string();
-                       sql = sql.replacen("?", &*format!("{}",v), 1);
-                   }else if v_string.ends_with(Uuid::ends_name()) {
-                       let v=v.to_string().replace(Uuid::ends_name(),"").to_string();
-                       sql = sql.replacen("?", &*format!("{}",v), 1);
-                   }else {
-                       sql = sql.replacen("?", &*format!("{}", v), 1);
-                   }
-
-
-                sql = sql.replace("\"", "'");
+            Value::String(_) => {
+                sql = sql.replacen("?", &*format!("{}", v), 1);
+                // sql = sql.replace("\"", "'");
             }
             // Value::Binary(_) => {}
             // Value::Array(_) => {}
             // Value::Map(_) => {}
-            // Value::Ext(name, ext_v) => {
-            //     if name.eq("Timestamp") {
-            //         sql= sql.replacen("?", &*format!("{}", ext_v), 1);
-            //     }
-            //     if name.eq("DateTime"){
-            //         sql= sql.replacen("?", &*format!("{}", ext_v), 1);
-            //     }
-            //
-            // }
+            Value::Ext(name, ext_v) => {
+                if name.eq("Timestamp") {
+                    let v=format!("{}",ext_v);
+                    let v=v.parse::<u64>().unwrap_or_default();
+                    sql = sql.replacen("?", &*format!("{}",v), 1);
+                }
+                if name.eq("DateTime"){
+                    sql= sql.replacen("?", &*format!("{}", ext_v), 1);
+                }
+                if name.eq("Time"){
+                    sql= sql.replacen("?", &*format!("{}", ext_v), 1);
+                }
+                if name.eq("DateTime"){
+                    sql= sql.replacen("?", &*format!("{}", ext_v), 1);
+                }
+            }
             // Value::Map(mut m) => {
             //     //Ok(IsNull::Yes)
             //     println!("{}",m);
@@ -208,6 +191,8 @@ pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String {
         }
 
     }
+    sql = sql.replace("\"", "'");
+
     return sql;
 }
 
@@ -227,7 +212,7 @@ mod test{
     #[test]
     fn test_value(){
         let string_v=Value::String("测试".to_string());
-        let timestamp_v=Value::from(vec![("Timestamp".into(),Value::I64(16778596100))]);
+        let timestamp_v=Value::Ext("Timestamp",Box::new(Value::I64(1677859610000)));
         println!("{},{}",timestamp_v,string_v);
         let mut  cvs:Vec<ColumnView>=vec![];
         // string_v.encode(&mut cvs);
@@ -244,10 +229,13 @@ mod test{
                         Value::String("测试".to_string()),
                         Value::U32(32),
                         Value::Bool(false),
-                        Value::from(Timestamp::from(1677859610000)),
-                        Value::from(Date::from_str("2023-03-20").unwrap()),
-                        Value::from(datetime::DateTime::from(fastdate::DateTime::now())),
-                        Value::from(rbdc::types::time::Time::from_str("15:04:05.999999999").unwrap()),
+                        Value::Ext("Timestamp",Box::new(Value::I64(1677859610000))),
+                        Value::Ext("Date", Box::new(Value::String("2023-03-20".to_string()))),
+                        // Value::from(Date::from_str("2023-03-20").unwrap()),
+                        Value::Ext("DateTime", Box::new(Value::String(fastdate::DateTime::now().to_string()))),
+                        // Value::from(datetime::DateTime::from(fastdate::DateTime::now())),
+                        Value::Ext("Time", Box::new(Value::String("15:04:05.999999999".to_string()))),
+                        // Value::from(rbdc::types::time::Time::from_str("15:04:05.999999999").unwrap()),
 
 
 
