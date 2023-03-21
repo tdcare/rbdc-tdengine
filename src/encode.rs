@@ -139,7 +139,7 @@ pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String {
                 if name.eq("Time"){
                     sql= sql.replacen("?", &*format!("{}", ext_v), 1);
                 }
-                if name.eq("DateTime"){
+                if name.eq("Date"){
                     sql= sql.replacen("?", &*format!("{}", ext_v), 1);
                 }
             }

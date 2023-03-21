@@ -80,10 +80,14 @@ impl Decode for Value {
             }
             Some(Ty::Timestamp) => {
                // let date=FastDateTime::from_str(&value).unwrap().unix_timestamp_millis();
-                let timestamp=Timestamp::from_str(&value).unwrap();
-                // let tv=TV::new("Timestamp",Value::I64(date));
-               return  Ok(Value::from(timestamp));
-
+               //  let timestamp=Timestamp::from_str(&value).unwrap();
+               //  // let tv=TV::new("Timestamp",Value::I64(date));
+               // return  Ok(Value::from(timestamp));
+               //  let date=FastDateTime::from_str(&value).unwrap().unix_timestamp_millis();
+               //  return Ok(Value::Ext("Timestamp",Box::new(Value::I64(date))));
+               //
+                let datetime=DateTime::from_str(&value).unwrap();
+                return Ok(Value::from(datetime));
 
             }
             Some(Ty::VarChar) => {

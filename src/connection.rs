@@ -36,6 +36,8 @@ impl Connection for TaosConnection{
     fn get_rows(&mut self, sql: &str, params: Vec<Value>) -> BoxFuture<Result<Vec<Box<dyn Row>>, Error>> {
         // let sql:String = TaosDriver {}.pub_exchange(sql);
         let mut sql=sql.to_string();
+        log::debug!("查询sql:{}",sql);
+
         Box::pin(async move {
             sql=sql_replacen(sql,params);
             let mut q = self.conn.query(sql).map_err(|e| Error::from(e.to_string()))?;
@@ -88,6 +90,7 @@ impl Connection for TaosConnection{
             //     .add_batch().map_err(|e| Error::from(e.to_string()))?
             //     .execute().map_err(|e| Error::from(e.to_string()))?;
             sql=sql_replacen(sql,params);
+            log::debug!("执行sql:{}",sql);
            let rows= self.conn.exec(sql).map_err(|e| Error::from(e.to_string()))?;
             Ok(ExecResult {
                 rows_affected: rows as u64,
