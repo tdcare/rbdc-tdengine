@@ -40,8 +40,14 @@ impl Connection for TaosConnection{
 
         Box::pin(async move {
             sql=sql_replacen(sql,params);
-            let mut q = self.conn.query(sql).map_err(|e| Error::from(e.to_string()))?;
             let mut results = vec![];
+
+            if sql.eq("begin") || sql.eq("commit") || sql.eq("rollback"){
+                log::warn!("不支持事务相关操作,直接返回");
+                return Ok(results)
+            }
+
+            let mut q = self.conn.query(sql).map_err(|e| Error::from(e.to_string()))?;
 
             if q.fields().len()==0{
                  return Ok(results)
@@ -91,8 +97,16 @@ impl Connection for TaosConnection{
             //     .execute().map_err(|e| Error::from(e.to_string()))?;
             sql=sql_replacen(sql,params);
             log::debug!("执行sql:{}",sql);
+            if sql.eq("begin") || sql.eq("commit") || sql.eq("rollback"){
+               log::warn!("不支持事务相关操作，直接返回");
+               return  Ok(ExecResult {
+                    rows_affected: 0 as u64,
+                    last_insert_id: Value::Null,
+                })
+            }
+
            let rows= self.conn.exec(sql).map_err(|e| Error::from(e.to_string()))?;
-            Ok(ExecResult {
+          return   Ok(ExecResult {
                 rows_affected: rows as u64,
                 last_insert_id: Value::Null,
             })

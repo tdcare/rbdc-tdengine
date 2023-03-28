@@ -87,5 +87,11 @@ async fn main()-> anyhow::Result<()> {
 
     let rows=Record::select_all(&mut rb).await?;
        println!("所有数据:{}",json!(rows));
+
+    // 事务测试
+    let mut tx=rb.acquire_begin().await.unwrap();
+    tx.exec("INSERT INTO tb1 VALUES (?,?) ", vec![Value::Ext("Timestamp",Box::new(Value::I64(1677859610000))),Value::I64(90)]).await;
+    tx.commit().await;
+
 Ok(())
 }
