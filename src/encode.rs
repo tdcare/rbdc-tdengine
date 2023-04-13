@@ -108,6 +108,9 @@ use rbs::Value;
 
 /// 将sql 语名中的 ？ 替换 为Value 中的值
 pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String {
+    // let  placeholders=vec!["###","@","##"];
+    // let mut  base64s=vec![];
+    // let mut index=0;
     for v in params {
         match v {
             // Value::Null => {}
@@ -121,8 +124,30 @@ pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String {
             // Value::F32(_) => {}
             // Value::F64(_) => {}
             Value::String(_) => {
-                sql = sql.replacen("?", &*format!("{}", v), 1);
+                // sql = sql.replacen("?", "#", 1);
                 // sql = sql.replace("\"", "'");
+               //  println!("{}",v);
+                let v_string=format!("{}",v);
+               //  while let Some(find)= v_string.find(placeholders[index]) {
+               //      index=index+1;
+               //      break;
+               //  };
+               // println!("{},{}",index,placeholders[index]);
+               // let base64= base64_url::encode(v_string.as_str());
+               //  base64s.push(v_string);
+                // println!("base64={}",base64);
+                // let data=base64_url::decode(&base64);
+                //  println!("{:?}",data);
+
+                // let v_rep=format!("{}",v).replace("\"",placeholders[index]);
+                // let v_rep=v_rep.trim_start_matches(placeholders[index]);
+                // let v_rep=v_rep.trim_end_matches(placeholders[index]);
+                //
+                // println!("{}",v_rep);
+
+                sql = sql.replacen("?", format!("{:?}",v_string).as_str(), 1);
+
+                 // sql = sql.replace("\"", "'");
             }
             // Value::Binary(_) => {}
             // Value::Array(_) => {}
@@ -142,6 +167,7 @@ pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String {
                 if name.eq("Date"){
                     sql= sql.replacen("?", &*format!("{}", ext_v), 1);
                 }
+
             }
             // Value::Map(mut m) => {
             //     //Ok(IsNull::Yes)
@@ -193,6 +219,9 @@ pub fn sql_replacen(mut sql:String,params: Vec<Value>)->String {
     }
     sql = sql.replace("\"", "'");
 
+    // sql=sql.replace(placeholders[index],"\"");
+
+
     return sql;
 }
 
@@ -224,9 +253,10 @@ mod test{
     #[test]
     fn string_replacen(){
         let mut sql="select * from table where id=? and name=? and u32=? and bool=? timestamp<? and date>? and datetime<? and time=?".to_string();
+        let json_string=r#"[{"ts##":"2023-04-13 22:32:38.223747","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MDC_PULS_OXIM_SAT_O2","vital_sign_value":"100","vital_sign_unit":"MDC_DIM_PERCENT","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null},{"ts":"2023-04-13 22:32:38.223848","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MDC_PULS_OXIM_PULS_RATE","vital_sign_value":"94","vital_sign_unit":"MDC_DIM_BEAT_PER_MIN","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null},{"ts":"2023-04-13 22:32:38.223929","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MDC_BLD_PERF_INDEX","vital_sign_value":"2.19","vital_sign_unit":"MDC_DIM_PERCENT","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null},{"ts":"2023-04-13 22:32:38.224007","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MDC_TTHOR_RESP_RATE","vital_sign_value":"20","vital_sign_unit":"MDC_DIM_RESP_PER_MIN","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null},{"ts":"2023-04-13 22:32:38.224084","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MDC_ECG_V_P_C_RATE","vital_sign_value":"0","vital_sign_unit":"MDC_DIM_BEAT_PER_MIN","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null},{"ts":"2023-04-13 22:32:38.224169","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MNDRY_ECG_PAUSE_RATE","vital_sign_value":"0","vital_sign_unit":"MDC_DIM_BEAT_PER_MIN","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null},{"ts":"2023-04-13 22:32:38.224248","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MNDRY_ECG_VPB_RATE","vital_sign_value":"0","vital_sign_unit":"MDC_DIM_BEAT_PER_MIN","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null},{"ts":"2023-04-13 22:32:38.224324","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MNDRY_ECG_RHY_V_P_C_CPLT_RATE","vital_sign_value":"0","vital_sign_unit":"MDC_DIM_BEAT_PER_MIN","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null},{"ts":"2023-04-13 22:32:38.224378","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MNDRY_ECG_RHY_MISSB_RATE","vital_sign_value":"0","vital_sign_unit":"MDC_DIM_BEAT_PER_MIN","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null},{"ts":"2023-04-13 22:32:38.224429","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MNDRY_ECG_BEAT_V_P_C_RonT_RATE","vital_sign_value":"0","vital_sign_unit":"MDC_DIM_BEAT_PER_MIN","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null},{"ts":"2023-04-13 22:32:38.22446","id":null,"device_no":"00","patientId":null,"vital_sign_name":"MDC_ECG_HEART_RATE","vital_sign_value":"95","vital_sign_unit":"MDC_DIM_BEAT_PER_MIN","acq_timestamp":1666277450000,"time_slot":null,"record_timestamp":null,"userId":null}]"#;
         let vaules=vec![
                         Value::I64(10),
-                        Value::String("测试".to_string()),
+                        Value::String(json_string.to_string()),
                         Value::U32(32),
                         Value::Bool(false),
                         Value::Ext("Timestamp",Box::new(Value::I64(1677859610000))),

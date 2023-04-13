@@ -1,6 +1,6 @@
 [package]
 name = "rbdc-tdengine"
-version = "4.3.2"
+version = "4.3.3"
 edition = "2021"
 description = "TDengine driver for rbatis"
 readme = "Readme.md"
