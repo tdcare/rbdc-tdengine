@@ -42,41 +42,75 @@ impl Decode for Value {
                 return Ok(Value::Bool(value.parse().unwrap()));
             }
             Some(Ty::TinyInt) => {
-                return Ok(Value::I32(value.parse().unwrap()));
+                if let Ok(v)=value.parse::<i32>(){
+                    return Ok(Value::I32(v));
+                }else {
+                    return Ok(Value::Null);
+                }
             }
             Some(Ty::SmallInt) => {
-                return Ok(Value::I32(value.parse().unwrap()));
+                if let Ok(v)=value.parse::<i32>(){
+                    return Ok(Value::I32(v));
+                }else {
+                    return Ok(Value::Null);
+                }
             }
             Some(Ty::Int) => {
-                return Ok(Value::I32(value.parse().unwrap()));
+                if let Ok(v)=value.parse::<i32>(){
+                    return Ok(Value::I32(v));
+                }else {
+                    return Ok(Value::Null);
+                }
             }
             Some(Ty::BigInt) => {
-                return Ok(Value::I64(value.parse().unwrap()));
-
+                if let Ok(v)=value.parse::<i64>(){
+                    return Ok(Value::I64(v));
+                }else {
+                    return Ok(Value::Null);
+                }
             }
             Some(Ty::UTinyInt) => {
-                return Ok(Value::U32(value.parse().unwrap()));
+                if let Ok(v)=value.parse::<u32>(){
+                    return Ok(Value::U32(v));
+                }else {
+                    return Ok(Value::Null);
+                }
 
             }
             Some(Ty::USmallInt) => {
-                return Ok(Value::U32(value.parse().unwrap()));
-
+                if let Ok(v)=value.parse::<u32>(){
+                    return Ok(Value::U32(v));
+                }else {
+                    return Ok(Value::Null);
+                }
             }
             Some(Ty::UInt) => {
-                return Ok(Value::U32(value.parse().unwrap()));
-
+                if let Ok(v)=value.parse::<u32>(){
+                    return Ok(Value::U32(v));
+                }else {
+                    return Ok(Value::Null);
+                }
             }
             Some(Ty::UBigInt) => {
-                return Ok(Value::U64(value.parse().unwrap()));
-
+                if let Ok(v)=value.parse::<u64>(){
+                    return Ok(Value::U64(v));
+                }else {
+                    return Ok(Value::Null);
+                }
             }
             Some(Ty::Float) => {
-                return Ok(Value::F32(value.parse().unwrap()));
-
+                if let Ok(v)=value.parse::<f32>(){
+                    return Ok(Value::F32(v));
+                }else {
+                    return Ok(Value::Null);
+                }
             }
             Some(Ty::Double) => {
-                return Ok(Value::F64(value.parse().unwrap()));
-
+                if let Ok(v)=value.parse::<f64>(){
+                    return Ok(Value::F64(v));
+                }else {
+                    return Ok(Value::Null);
+                }
             }
             Some(Ty::Timestamp) => {
                // let date=FastDateTime::from_str(&value).unwrap().unix_timestamp_millis();
