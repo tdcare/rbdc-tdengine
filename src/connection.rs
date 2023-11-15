@@ -104,8 +104,23 @@ impl Connection for TaosConnection{
                     last_insert_id: Value::Null,
                 })
             }
-
+           // let rows=tokio::runtime::Runtime::block_on(self.conn.exec(sql));
            let rows= self.conn.exec(sql).map_err(|e| Error::from(e.to_string()))?;
+           // let handle=  tokio::runtime::Handle::try_current().unwrap();
+            // let mut runtime =  tokio::runtime::current_thread();
+
+            // let future = async move {
+            //    return   self.conn.clone().exec(sql).map_err(|e| Error::from(e.to_string()));
+            // };
+           //  let s=&self.conn;
+           // let rows= tokio::task::spawn_blocking(move || {
+           //    let rows= s.exec(sql).map_err(|e| Error::from(e.to_string()));
+           //    rows
+           // }).await.unwrap().unwrap();
+           // let rows= runtime.block_on(future)?;
+
+           //  let rows=rows.map_err(|e| Error::from(e.to_string()))?;
+
           return   Ok(ExecResult {
                 rows_affected: rows as u64,
                 last_insert_id: Value::Null,
