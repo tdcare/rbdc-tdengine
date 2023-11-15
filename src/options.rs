@@ -26,9 +26,9 @@ impl ConnectOptions for TaosConnectOptions{
         Ok(())
     }
 
-    fn uppercase_self(&self) -> &(dyn Any + Send + Sync) {
-        self
-    }
+    // fn uppercase_self(&self) -> &(dyn Any + Send + Sync) {
+    //     self
+    // }
 }
 impl Default for TaosConnectOptions {
     fn default() -> Self {

@@ -5,12 +5,12 @@ edition = "2021"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
-rbs = "4.3.0"
-rbdc = { version = "4.3.0", default-features = false }
+rbs = "4.5"
+rbdc = { version = "4.5", default-features = false }
 rbdc-tdengine={path="../"}
-rbatis = { version = "4.3.0" }
+rbatis = { version = "4.5" }
 serde_json = "1"
-fastdate = { version = "0.1"}
+fastdate = { version = "0.3"}
 bigdecimal = { version = "0.2.0", features = ["serde"] }
 log = "0.4.2"
 fast_log = "1.5"

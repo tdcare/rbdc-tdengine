@@ -5,10 +5,9 @@ use bigdecimal::BigDecimal;
 use taos::ColumnView;
 use taos::Ty;
 use std::sync::Arc;
-use rbdc::{datetime::FastDateTime, Error};
+use rbdc::{datetime::DateTime, Error};
 use rbs::Value;
 use std::str::FromStr;
-use rbdc::datetime::DateTime;
 use rbdc::timestamp::Timestamp;
 use crate::rows::TaosColumn;
 use crate::rows::TaosData;
@@ -16,7 +15,7 @@ use crate::rows::TaosData;
 pub trait Decode {
     fn decode(row: &TaosData,columns:&Arc<Vec<TaosColumn>>) -> Result<Value, Error>;
 }
-
+/// 将TDengine 返回的数据转换为 Rbatis 的Value 类型
 impl Decode for Value {
     fn decode(row: &TaosData,columns:&Arc<Vec<TaosColumn>>) -> Result<Value, Error> {
         let s = row.value.as_ref();

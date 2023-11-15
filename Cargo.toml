@@ -1,6 +1,6 @@
 [package]
 name = "rbdc-tdengine"
-version = "4.3.4"
+version = "4.5.0"
 edition = "2021"
 description = "TDengine driver for rbatis"
 readme = "Readme.md"
@@ -10,8 +10,8 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rbs = "4.3.0"
-rbdc = { version = "4.3.0"}
+rbs = "4.5"
+rbdc = { version = "4.5"}
 
 serde = "1"
 serde_json = "1"
@@ -24,10 +24,10 @@ bigdecimal = { version = "0.2.0", features = ["serde"] }
 #thiserror = "1.0.39"
 #anyhow = "1.0.69"
 
-fastdate = "0.1.33"
+fastdate = "0.3"
 
 tokio = {version="1",features=["fs", "net", "rt", "rt-multi-thread", "time", "io-util"]}
 tokio-util = {version="0.7.1",features=["compat"]}
 
-taos = { version = "0.5.1", default-features = false, features = ["ws"] }
-taos-query = "0.5.1"
+taos = { version = "0.10.19", default-features = false, features = ["ws"] }
+taos-query = "0.10.19"
