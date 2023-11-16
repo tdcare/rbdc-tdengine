@@ -36,7 +36,7 @@ impl Connection for TaosConnection{
     fn get_rows(&mut self, sql: &str, params: Vec<Value>) -> BoxFuture<Result<Vec<Box<dyn Row>>, Error>> {
         // let sql:String = TaosDriver {}.pub_exchange(sql);
         let mut sql=sql.to_string();
-        log::debug!("查询sql:{}",sql);
+        log::debug!("将要执行的sql:{}",sql);
 
         Box::pin(async move {
             sql=sql_replacen(sql,params);
@@ -61,20 +61,20 @@ impl Connection for TaosConnection{
                     column_type: field.ty() });
             }
             for row in q.rows(){
-                let row = row.map_err(|e| Error::from(e.to_string()))?;
+                let row_view = row.map_err(|e| Error::from(e.to_string()))?;
                 let mut datas =vec![];
-                for (name, value) in row {
+                for (name, value) in row_view {
                     datas.push(TaosData {
                         value: Some(format!("{}",value)),
                         colunm_name: name.to_string(),
                     });
 
                 }
-                let row = TaosRow {
+                let taos_row = TaosRow {
                     columns: Arc::new(columns.clone()),
                     datas: datas,
                 };
-                results.push(Box::new(row) as Box<dyn Row>);
+                results.push(Box::new(taos_row) as Box<dyn Row>);
             }
 
             Ok(results)
@@ -96,7 +96,7 @@ impl Connection for TaosConnection{
             //     .add_batch().map_err(|e| Error::from(e.to_string()))?
             //     .execute().map_err(|e| Error::from(e.to_string()))?;
             sql=sql_replacen(sql,params);
-            log::debug!("执行sql:{}",sql);
+            log::debug!("将要执行sql:{}",sql);
             if sql.eq("begin") || sql.eq("commit") || sql.eq("rollback"){
                log::warn!("不支持事务相关操作，直接返回");
                return  Ok(ExecResult {

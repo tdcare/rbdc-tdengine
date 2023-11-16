@@ -1,6 +1,6 @@
 [package]
 name = "rbdc-tdengine"
-version = "4.5.1"
+version = "4.5.2"
 edition = "2021"
 description = "TDengine driver for rbatis"
 readme = "Readme.md"
@@ -31,7 +31,7 @@ tokio-util = {version="0.7.1",features=["compat"]}
 
 
 #taos = { version = "0.10.19", default-features = false, features = ["ws"] }
-
-taos = { version = "0.5.1", default-features = false, features = ["ws"] }
+taos={git="https://gitee.com/tdcare/taos-connector-rust.git",branch="v0.10.20-fix" , default-features = false, features = ["ws"]}
+#taos = { version = "0.5.1", default-features = false, features = ["ws"] }
 #taos-query = "0.5.1"
 #taos = "*"

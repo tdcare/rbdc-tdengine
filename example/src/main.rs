@@ -29,7 +29,7 @@ struct Record {
     phase: Option<f32>,
 }
 
-crud!(Record{},"meters");
+crud!(Record{},"meters1");
 #[py_sql(
 "`INSERT INTO `
    ` #{tbname} USING meters TAGS(2,'California.SanFrancisco')`
@@ -45,7 +45,7 @@ async fn insert_to_meters(rb: &mut dyn Executor,tbname:&str,dt:DateTime)->(){
 async fn main()-> anyhow::Result<()> {
     fast_log::init(fast_log::Config::new().console()).expect("");
     let mut rb = RBatis::new();
-    rb.init_option::<TaosDriver,TaosConnectOptions,DeadPool>(
+    rb.init_opt(
         TaosDriver {},
         TaosConnectOptions {
             dsn: "taos+ws://localhost:6041/test".to_string(),
