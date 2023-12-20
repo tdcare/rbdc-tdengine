@@ -36,10 +36,11 @@ impl Connection for TaosConnection{
     fn get_rows(&mut self, sql: &str, params: Vec<Value>) -> BoxFuture<Result<Vec<Box<dyn Row>>, Error>> {
         // let sql:String = TaosDriver {}.pub_exchange(sql);
         let mut sql=sql.to_string();
-        log::debug!("将要执行的sql:{}",sql);
 
         Box::pin(async move {
             sql=sql_replacen(sql,params);
+            log::debug!("将要执行的sql:{}",sql);
+
             let mut results = vec![];
 
             if sql.eq("begin") || sql.eq("commit") || sql.eq("rollback"){
