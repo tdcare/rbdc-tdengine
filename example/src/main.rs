@@ -29,7 +29,7 @@ struct Record {
     phase: Option<f32>,
 }
 
-crud!(Record{},"meters1");
+crud!(Record{},"meters");
 #[py_sql(
 "`INSERT INTO `
    ` #{tbname} USING meters TAGS(2,'California.SanFrancisco')`
@@ -76,7 +76,7 @@ async fn main()-> anyhow::Result<()> {
 
    let rows=Record::insert(&mut rb,&record).await.expect("insert failed");
     println!("单行 插入了{}行数据",rows.rows_affected);
-
+   //
     let rows=Record::insert_batch(&mut rb,&records,2).await.expect("insert failed");
     println!("批量 插入了{}行数据",rows.rows_affected);
 
@@ -85,13 +85,13 @@ async fn main()-> anyhow::Result<()> {
     println!("用py_sql 插入到 d1001 ts={}",dt);
     insert_to_meters(&mut rb,"d1001",dt).await;
 
-    let rows=Record::select_all(&mut rb).await?;
-       println!("所有数据:{}",json!(rows));
-
-    // 事务测试
-    let mut tx=rb.acquire_begin().await.unwrap();
-    tx.exec("INSERT INTO tb1 VALUES (?,?) ", vec![Value::Ext("Timestamp",Box::new(Value::I64(1677859610000))),Value::I64(90)]).await;
-    tx.commit().await;
+    // let rows=Record::select_all(&mut rb).await?;
+    //    println!("所有数据:{}",json!(rows));
+    //
+    // // // 事务测试
+    // let mut tx=rb.acquire_begin().await.unwrap();
+    // tx.exec("INSERT INTO tb1 VALUES (?,?) ", vec![Value::Ext("Timestamp",Box::new(Value::I64(1677859610000))),Value::I64(90)]).await;
+    // tx.commit().await;
 
 Ok(())
 }

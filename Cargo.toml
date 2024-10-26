@@ -34,7 +34,7 @@ tokio = {version="1",features=["fs", "net", "rt", "rt-multi-thread", "time", "io
 tokio-util = {version="0.7.1",features=["compat"]}
 
 
-taos = { version = "0.11.2", default-features = false,optional = true }
+taos = { version = "0.12.3", default-features = false,optional = true }
 #taos={git="https://gitee.com/tdcare/taos-connector-rust.git",branch="v0.10.20-fix" , default-features = false,optional = true}
 #taos = { version = "0.5.1", default-features = false, features = ["ws"] }
 #taos-query = "0.5.1"
