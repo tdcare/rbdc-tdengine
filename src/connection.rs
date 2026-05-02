@@ -1,19 +1,14 @@
-use std::collections::HashMap;
 use futures_core::future::BoxFuture;
+use futures_core::stream::BoxStream;
+use futures_util::StreamExt;
 use rbdc::db::{Connection, ExecResult, Row};
+use rbdc::try_stream;
 use rbdc::Error;
 use rbs::Value;
 use std::sync::Arc;
-use futures_util::TryFutureExt;
-use rbs::value::map::ValueMap;
 use taos::sync::*;
-use taos::ColumnView;
-// use taos_query::common::raw::rows::RowView;
-// use taos_query::AsyncFetchable;
 
-use crate::driver::TaosDriver;
 use crate::encode::*;
-
 use crate::options::TaosConnectOptions;
 use crate::rows::{TaosColumn, TaosData, TaosRow};
 
@@ -33,56 +28,63 @@ pub struct TaosConnection {
 }
 
 impl Connection for TaosConnection{
-    fn get_rows(&mut self, sql: &str, params: Vec<Value>) -> BoxFuture<Result<Vec<Box<dyn Row>>, Error>> {
-        // let sql:String = TaosDriver {}.pub_exchange(sql);
-        let mut sql=sql.to_string();
-
+    fn exec_rows(
+        &mut self,
+        sql: &str,
+        params: Vec<Value>,
+    ) -> BoxFuture<'_, Result<BoxStream<'_, Result<Box<dyn Row>, Error>>, Error>> {
+        let mut sql = sql.to_string();
+        let conn = self.conn.clone();
         Box::pin(async move {
-            sql=sql_replacen(sql,params);
-            log::debug!("将要执行的sql:{}",sql);
+            sql = sql_replacen(sql, params);
+            log::debug!("将要执行的sql:{}", sql);
 
-            let mut results = vec![];
+            let mut results: Vec<Box<dyn Row>> = vec![];
 
-            if sql.eq("begin") || sql.eq("commit") || sql.eq("rollback"){
+            if sql.eq("begin") || sql.eq("commit") || sql.eq("rollback") {
                 log::warn!("不支持事务相关操作,直接返回");
-                return Ok(results)
-            }
+            } else {
+                let mut q = conn.query(&sql).map_err(|e| Error::from(e.to_string()))?;
 
-            let mut q = self.conn.query(sql).map_err(|e| Error::from(e.to_string()))?;
-
-            if q.fields().len()==0{
-                 return Ok(results)
-             }
-            let  fields=q.fields();
-
-            let mut columns = vec![];
-            for field in fields {
-                columns.push(TaosColumn{
-                    name: field.name().to_string(),
-                    column_type: field.ty() });
-            }
-            for row in q.rows(){
-                let row_view = row.map_err(|e| Error::from(e.to_string()))?;
-                let mut datas =vec![];
-                for (name, value) in row_view {
-                    datas.push(TaosData {
-                        value: Some(format!("{}",value)),
-                        colunm_name: name.to_string(),
-                    });
-
+                if q.fields().len() > 0 {
+                    let fields = q.fields();
+                    let mut columns = vec![];
+                    for field in fields {
+                        columns.push(TaosColumn {
+                            name: field.name().to_string(),
+                            column_type: field.ty(),
+                        });
+                    }
+                    for row in q.rows() {
+                        let row_view = row.map_err(|e| Error::from(e.to_string()))?;
+                        let mut datas = vec![];
+                        for (name, value) in row_view {
+                            datas.push(TaosData {
+                                value: Some(format!("{}", value)),
+                                colunm_name: name.to_string(),
+                            });
+                        }
+                        let taos_row = TaosRow {
+                            columns: Arc::new(columns.clone()),
+                            datas,
+                        };
+                        results.push(Box::new(taos_row));
+                    }
                 }
-                let taos_row = TaosRow {
-                    columns: Arc::new(columns.clone()),
-                    datas: datas,
-                };
-                results.push(Box::new(taos_row) as Box<dyn Row>);
             }
 
-            Ok(results)
+            let stream = try_stream! {
+                for row in results {
+                    r#yield!(row);
+                }
+                Ok(())
+            }
+            .boxed();
+            Ok(stream)
         })
     }
 
-    fn exec(&mut self, sql: &str, params: Vec<Value>) -> BoxFuture<Result<ExecResult, Error>> {
+    fn exec(&mut self, sql: &str, params: Vec<Value>) -> BoxFuture<'_, Result<ExecResult, Error>> {
         // log::debug!("sql={}",sql);
         let mut sql=sql.to_string();
         Box::pin(async move {
@@ -129,13 +131,13 @@ impl Connection for TaosConnection{
         })
         }
 
-    fn close(&mut self) -> BoxFuture<Result<(), Error>> {
+    fn close(&mut self) -> BoxFuture<'_, Result<(), Error>> {
         Box::pin(async move {
             Ok(())
         })
     }
 
-    fn ping(&mut self) -> BoxFuture<Result<(), Error>> {
+    fn ping(&mut self) -> BoxFuture<'_, Result<(), Error>> {
         Box::pin(async move {
             Ok(())
         })

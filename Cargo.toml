@@ -1,11 +1,14 @@
 [package]
 name = "rbdc-tdengine"
-version = "4.5.12"
+version = "4.9.0"
 edition = "2021"
-description = "TDengine driver for rbatis"
+description = "rbatis ORM TDengine driver"
 readme = "Readme.md"
 authors = ["tzw<tzw@tdcare.cn>"]
 license = "MIT"
+repository = "https://github.com/tdcare/rbdc-tdengine"
+homepage = "https://github.com/tdcare/rbdc-tdengine"
+documentation = "https://docs.rs/rbdc-tdengine"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
@@ -14,8 +17,8 @@ ws=["rbdc/rustls","taos/ws"]
 ws-tls-rustls=["rbdc/tls-rustls","taos/ws-rustls"]
 ws-tls-native-tls=["rbdc/tls-native-tls","taos/ws-native-tls"]
 [dependencies]
-rbs = "4.5"
-rbdc = { version = "4.5", default-features = false, optional = true}
+rbs = "4.8"
+rbdc = { version = "4.9", default-features = false, optional = true}
 
 serde = "1"
 serde_json = "1"

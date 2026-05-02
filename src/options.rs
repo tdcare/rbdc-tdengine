@@ -2,7 +2,6 @@ use futures_core::future::BoxFuture;
 use rbdc::db::{ConnectOptions, Connection};
 use rbdc::Error;
 use serde::{Deserialize, Serialize};
-use std::any::Any;
 
 use crate::connection::TaosConnection;
 
@@ -12,7 +11,7 @@ pub struct TaosConnectOptions {
 }
 
 impl ConnectOptions for TaosConnectOptions{
-    fn connect(&self) -> BoxFuture<Result<Box<dyn Connection>, Error>> {
+    fn connect(&self) -> BoxFuture<'_, Result<Box<dyn Connection>, Error>> {
         Box::pin(async move {
             let v = TaosConnection::establish(self)
                 .await

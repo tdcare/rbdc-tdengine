@@ -14,13 +14,13 @@ impl Driver for TaosDriver{
         "Taos"
     }
 
-    fn connect(&self, url: &str) -> BoxFuture<Result<Box<dyn Connection>, Error>> {
+    fn connect(&self, _url: &str) -> BoxFuture<'_, Result<Box<dyn Connection>, Error>> {
         Box::pin(async move {
             unimplemented!();
         })
     }
 
-    fn connect_opt<'a>(&'a self, opt: &'a dyn ConnectOptions) -> BoxFuture<Result<Box<dyn Connection>, Error>> {
+    fn connect_opt<'a>(&'a self, opt: &'a dyn ConnectOptions) -> BoxFuture<'a, Result<Box<dyn Connection>, Error>> {
         let opt = opt.downcast_ref::<TaosConnectOptions>().unwrap();
         Box::pin(async move {
             let conn = TaosConnection::establish(opt).await?;
